@@ -49,7 +49,7 @@ $ sudo systemctl enable gogs
 
 After starting the Gogs service, access the GUI installation via localhost:3000. Choose the SQLite database type as our database
 
-![GogsGUI](https://rhel.co.il/wp-content/uploads/2024/02/Screenshot-2024-02-19-001304.png)<br>
+![GogsGUI](../resources/Gogs%20Git%20Server%20and%20Nginx/GogsGUI.png)<br>
 
 Afterwards, for our domain, we’ll switch to our own domain. I choose         “gogs-stav” and change our application URL to your desired URL
 
