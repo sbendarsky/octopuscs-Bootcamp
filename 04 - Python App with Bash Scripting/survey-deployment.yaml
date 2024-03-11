@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: survey-app-deployment            # Name of the Deployment resource
+  namespace: survey-app                  # Specifies the namespace where the Deployment resides
+spec:
+  replicas: 1                            # Number of desired replicas for the Deployment
+  selector:
+    matchLabels:
+      app: survey-app                    # Labels used to match Pods controlled by this Deployment
+  template:
+    metadata:
+      labels:
+        app: survey-app                  # Labels applied to Pods created by this Deployment
+    spec:
+      containers:
+      - name: survey-app-container       # Name of the container
+        image: registry-stav.tamnun.lab/hotcold/survey-app:latest  # Docker image for the container
+        ports:
+        - containerPort: 5000            # Port exposed by the container
+        env:
+        - name: MONGO_HOST               # Environment variable for MongoDB host
+          value: "172.18.255.202"       # IP address of the MongoDB service
+        - name: MONGO_PORT               # Environment variable for MongoDB port
+          value: "27017"                 # Port MongoDB is listening on
+        - name: MONGO_INITDB_ROOT_USERNAME  # Environment variable for MongoDB root username
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secret         # Name of the secret containing MongoDB username
+              key: username             # Key within the secret containing MongoDB username
+        - name: MONGO_INITDB_ROOT_PASSWORD  # Environment variable for MongoDB root password
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secret         # Name of the secret containing MongoDB password
+              key: password             # Key within the secret containing MongoDB password

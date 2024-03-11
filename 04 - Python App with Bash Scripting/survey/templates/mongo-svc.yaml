@@ -1,0 +1,16 @@
+apiVersion: "v1"
+kind: "Service"
+metadata:
+  name: {{ .Values.mongosvc.name }}
+  namespace: {{ .Values.mongosvc.namespace }}
+  labels:
+    app: {{ .Values.mongosvc.labelApp }}
+spec:
+  externalTrafficPolicy: {{ .Values.mongosvc.externalTrafficPolicy }}
+  ports:
+    - name: {{ .Values.mongosvc.ports.name }}
+      port: {{ .Values.mongosvc.ports.port }}
+      nodePort: {{ .Values.mongosvc.ports.nodePort }}
+  type: {{ .Values.mongosvc.type }}
+  selector:
+    app: {{ .Values.mongosvc.selector.app }}

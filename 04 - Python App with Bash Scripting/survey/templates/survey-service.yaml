@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.surveyservice.name }}
+  namespace: {{ .Values.surveyservice.namespace }}
+spec:
+  selector:
+    app: {{ .Values.surveyservice.selectorApp }}
+  ports:
+  - protocol: {{ .Values.surveyservice.protocol }}
+    port: {{ .Values.surveyservice.port }}
+    targetPort: {{ .Values.surveyservice.targetPort }}
+  type: {{ .Values.surveyservice.type }}

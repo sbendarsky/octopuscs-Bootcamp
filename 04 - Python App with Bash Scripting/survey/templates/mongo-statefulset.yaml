@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Values.mongostatefulset.name }}
+  namespace: {{ .Values.mongostatefulset.namespace }}
+spec:
+  serviceName: {{ .Values.mongostatefulset.serviceName }}
+  replicas: {{ .Values.mongostatefulset.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.mongostatefulset.MatchLabels }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.mongostatefulset.lables }}
+    spec:
+      containers:
+        - name: {{ .Values.mongostatefulset.containerName }}
+          image: {{ .Values.mongostatefulset.image }}
+          imagePullPolicy: {{ .Values.mongostatefulset.imagePullPolicy }}
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.mongosecret.name }}
+                  key: username
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.mongosecret.name }}
+                  key: password
+          ports:
+            - containerPort: {{ .Values.mongostatefulset.containerPort }}
+              name: {{ .Values.mongostatefulset.PortName }}
+          volumeMounts:
+            - name: {{ .Values.mongostatefulset.VolumeName }}
+              mountPath: {{ .Values.mongostatefulset.mountPath }}
+      volumes:
+        - name: {{ .Values.mongostatefulset.VolumeName }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.mongostatefulset.pvcName }}

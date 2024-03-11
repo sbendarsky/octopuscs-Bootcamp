@@ -1,0 +1,17 @@
+apiVersion: "v1"
+kind: "Service"             # Specifies the Kubernetes resource type as Service
+metadata:
+  name: "mongo-db"          # Name of the Service, in this case, "mongo-db"
+  namespace: "survey-app"   # Specifies the namespace where the Service resides
+  labels:                   # Labels attached to the Service
+    app: "mongo-db"         # Label indicating the application associated with the Service
+spec:
+  externalTrafficPolicy: "Local"  # Specifies the traffic policy for external traffic
+  ports:
+    -
+      name: "mongodb"       # Name of the port, in this case, "mongodb"
+      port: 27017           # Port number for MongoDB
+      nodePort: 30332       # Specifies the node port for the Service
+  type: "LoadBalancer"      # Specifies the type of Service as LoadBalancer
+  selector:                 # Selects the set of Pods targeted by this Service
+    app: "mongo-db"         # Matches Pods with the label "app: mongo-db"

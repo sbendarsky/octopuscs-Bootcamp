@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        /* CSS for aligning headers in the middle */
+        section {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <h1>Dashboard</h1>
+    </header>
+
+
+    <!-- Total Votes Section -->
+    <section id="total-votes">
+        <h2>Total Votes</h2>
+        <table class="dashboard-table">
+            <thead>
+                <tr>
+                    <th>Candidate</th> <!-- Header for candidate name -->
+                    <th>Total Votes</th> <!-- Header for total votes -->
+                </tr>
+            </thead>
+            <tbody>
+                {% for candidate in candidates %}
+                <tr>
+                    <td>{{ candidate.name }}</td> <!-- Display candidate name -->
+                    <td>{{ candidate.votes }}</td> <!-- Display total votes for the candidate -->
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+
+
+    <!-- Votes by Individual Section -->
+    <section id="individual-votes">
+        <h2>Votes by Individual</h2>
+        <table class="dashboard-table">
+            <thead>
+                <tr>
+                    <th>Name</th> <!-- Header for individual's name -->
+                    <th>Voted For</th> <!-- Header for candidate voted for -->
+                </tr>
+            </thead>
+            <tbody>
+                {% for vote in votes %}
+                <tr>
+                    <td>{{ vote.name }}</td> <!-- Display individual's name -->
+                    <td>
+                        {% if vote.biden_choice == "1" %}
+                            Biden <!-- Display if the individual voted for Biden -->
+                        {% elif vote.trump_choice == "1" %}
+                            Trump <!-- Display if the individual voted for Trump -->
+                        {% else %}
+                            No Vote <!-- Display if the individual did not vote -->
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+</body>
+</html>

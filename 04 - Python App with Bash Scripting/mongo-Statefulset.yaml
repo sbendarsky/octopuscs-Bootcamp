@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: StatefulSet                      # Specifies the Kubernetes resource type as StatefulSet
+metadata:
+  name: mongo-db                       # Name of the StatefulSet, in this case, "mongo-db"
+  namespace: survey-app                # Specifies the namespace where the StatefulSet resides
+spec:
+  serviceName: mongo-db               # Specifies the service name associated with this StatefulSet
+  replicas: 1                         # Number of replicas for the StatefulSet
+  selector:
+    matchLabels:
+      app: mongo-db                    # Labels used to match Pods managed by this StatefulSet
+  template:
+    metadata:
+      labels:
+        app: mongo-db                  # Labels applied to Pods created from this StatefulSet
+    spec:
+      containers:
+        - name: mongo-db               # Name of the container
+          image: mongo:4.4.6           # Docker image used for the container
+          imagePullPolicy: Always      # Specifies the image pull policy
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME    # Environment variable for MongoDB root username
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret     # Name of the Secret containing the username
+                  key: username         # Key within the Secret for the username
+            - name: MONGO_INITDB_ROOT_PASSWORD    # Environment variable for MongoDB root password
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret     # Name of the Secret containing the password
+                  key: password         # Key within the Secret for the password
+          ports:
+            - containerPort: 27017      # Port the container exposes for MongoDB
+              name: mongodb             # Name of the port
+          volumeMounts:
+            - name: mongodb-persistent-storage   # Name of the volume
+              mountPath: /data/db       # Mount path for the persistent volume
+      volumes:
+        - name: mongodb-persistent-storage    # Name of the persistent volume
+          persistentVolumeClaim:
+            claimName: mongodb-pvc    # Name of the PersistentVolumeClaim used by the persistent volume

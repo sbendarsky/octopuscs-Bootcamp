@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolume      # Specifies the Kubernetes resource type as PersistentVolume
+metadata:
+  name: mongodb-pv 	     # Name of the PersistentVolume, in this case, "mongodb-pv"
+spec:
+  capacity:
+    storage: 1Gi            # Specifies the storage capacity of the PersistentVolume
+  accessModes:
+    - ReadWriteOnce         # Defines the access mode for the PersistentVolume
+  storageClassName: gp2     # Specifies the storage class for dynamic provisioning
+  hostPath:
+    path: /dev/db           # Specifies the host path for the PersistentVolume

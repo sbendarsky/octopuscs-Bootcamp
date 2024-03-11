@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: survey-app-ingress                # Name of the Ingress resource
+  namespace: survey-app                  # Specifies the namespace where the Ingress resides
+  annotations:
+    kubernetes.io/ingress.class: "nginx" # Annotation specifying the Ingress class
+spec:
+  rules:
+  - host: survey-stav.tamnun.lab         # Hostname for accessing the application
+    http:
+      paths:
+      - path: /                           # Path for accessing the application
+        pathType: Prefix                  # Specifies the type of path matching
+        backend:
+          service:
+            name: survey-app-service      # Name of the backend Service
+            port:
+              number: 80                  # Port number exposed by the backend Service

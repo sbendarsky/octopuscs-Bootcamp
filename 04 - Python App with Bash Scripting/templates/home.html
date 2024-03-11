@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vote</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>Vote for Candidates</h1> <!-- Heading for the voting form -->
+    <form id="voting-form" method="post"> <!-- Voting form -->
+        <label for="name">Your Name:</label> <!-- Label for the name input -->
+        <input type="text" id="name" name="name"><br><br> <!-- Input field for entering name -->
+        <div class="candidate-buttons"> <!-- Div for candidate buttons -->
+            <button type="button" class="candidate-button" id="biden-btn" value="biden">Vote for Biden</button> <!-- Button to vote for Biden -->
+            <button type="button" class="candidate-button" id="trump-btn" value="trump">Vote for Trump</button> <!-- Button to vote for Trump -->
+            <input type="hidden" id="biden" name="biden"> <!-- Hidden input field to store the vote for Biden -->
+            <input type="hidden" id="trump" name="trump"> <!-- Hidden input field to store the vote for Trump -->
+        </div>
+    </form>
+    <script src="{{ url_for('static', filename='scripts.js') }}"></script> <!-- Script file for handling button clicks -->
+</body>
+</html>

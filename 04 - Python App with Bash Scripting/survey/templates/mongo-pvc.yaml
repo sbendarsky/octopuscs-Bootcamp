@@ -1,0 +1,14 @@
+apiVersion: "v1"
+kind: "PersistentVolumeClaim"
+metadata:
+  name: "{{ .Values.mongopvc.name }}"
+  namespace: "{{ .Values.mongopvc.namespace }}"
+  labels:
+    app: "{{ .Values.mongopvc.labels.app }}"
+spec:
+  accessModes:
+    - {{ .Values.mongopvc.accessMode }}
+  resources:
+    requests:
+      storage: {{ .Values.mongopvc.resources.requests.storage }}
+  storageClassName: {{ .Values.mongopvc.storageClassName }}

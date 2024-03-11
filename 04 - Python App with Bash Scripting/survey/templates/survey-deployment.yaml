@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.surveydeployment.name }}
+  namespace: {{ .Values.surveydeployment.namespace }}
+spec:
+  replicas: {{ .Values.surveydeployment.replicas }}
+  selector:
+    matchLabels:
+      app: survey-app
+  template:
+    metadata:
+      labels:
+        app: survey-app
+    spec:
+      containers:
+        - name: {{ .Values.surveydeployment.containerName }}
+          image: {{ .Values.surveydeployment.containerImage }}
+          ports:
+            - containerPort: {{ .Values.surveydeployment.containerPort }}
+          env:
+          - name: MONGO_HOST
+            value: {{ .Values.mongosvc.name }}  # Name of the MongoDB service
+          - name: MONGO_PORT
+            value: "27017"  # Port MongoDB is listening on
+          - name: MONGO_INITDB_ROOT_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: mongo-secret  # Name of the secret containing MongoDB username
+                key: username  # Key within the secret containing MongoDB username
+          - name: MONGO_INITDB_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mongo-secret  # Name of the secret containing MongoDB password
+                key: password  # Key within the secret containing MongoDB password

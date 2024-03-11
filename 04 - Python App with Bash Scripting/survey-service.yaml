@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: survey-app-service          # Name of the Service, in this case, "survey-app-service"
+  namespace: survey-app             # Specifies the namespace where the Service resides
+spec:
+  selector:
+    app: survey-app                 # Selects Pods with the label "app: survey-app"
+  ports:
+  - protocol: TCP                  # Specifies the protocol used for the port (TCP)
+    port: 80                        # Port exposed on the Service
+    targetPort: 5000                # Port to which traffic will be forwarded to in the Pods
+  type: ClusterIP                   # Specifies the type of Service as ClusterIP

@@ -1,0 +1,4 @@
+apiVersion: v1
+kind: Namespace    # Specifies the Kubernetes resource type as Namespace
+metadata:
+  name: survey-app   # Name of the namespace, in this case, "survey-app"

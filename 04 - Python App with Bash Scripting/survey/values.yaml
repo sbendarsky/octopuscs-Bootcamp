@@ -1,0 +1,88 @@
+namespace: survey-app
+ingress:
+  name: survey-app-ingress
+  namespace: survey-app
+  host: survey-stav.tamnun.lab
+  service:
+    name: survey-app-service
+    port: "80"
+
+
+mongopv:
+  name: mongodb-pv
+  storage: 1Gi
+  accessMode: ReadWriteOnce
+  storageClassName: gp2
+  hostPath: /dev/db
+
+
+mongopvc:
+  name: mongodb-pvc
+  namespace: survey-app
+  labels:
+    app: mongo-db
+  accessMode: ReadWriteOnce
+  storageClassName: gp2
+  resources:
+    requests:
+      storage: 1Gi
+
+
+mongosecret:
+  name: mongo-secret
+  namespace: survey-app
+  username: admin
+  password: admin
+
+
+mongosvc:
+  name: mongo-db
+  namespace: survey-app
+  labelApp: mongo-db
+  externalTrafficPolicy: Local
+  ports:
+    name: mongodb
+    port: "27017"  # This should be a string
+    nodePort: "30332"
+  type: LoadBalancer
+  selector:
+    app: mongo-db
+
+
+
+
+mongostatefulset:
+  name: mongo-db
+  namespace: survey-app
+  serviceName: mongo-db
+  replicas: ""
+  MatchLabels: mongo-db
+  lables: mongo-db
+  containerName: mongo-db
+  image: mongo:4.4.6
+  imagePullPolicy: Always
+  containerPort: "27017"
+  PortName: mongodb
+  VolumeName: mongodb-persistent-storage
+  mountPath: /data/db
+  pvcName: mongodb-pvc
+
+
+surveyservice:
+  name: survey-app-service
+  namespace: survey-app
+  selectorApp: survey-app
+  protocol: TCP
+  port: "80"
+  targetPort: "5000"
+  type: ClusterIP
+
+
+surveydeployment:
+  name: survey-app-deployment
+  namespace: survey-app
+  replicas: "1"
+  containerName: survey-app-container
+  containerImage: registry-stav.tamnun.lab/hotcold/survey-app:latest
+  containerPort: "5000"
+  port: "27017"
