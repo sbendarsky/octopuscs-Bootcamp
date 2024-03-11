@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hotcold-service             # Name of the service
+  namespace: hotcold-namespace     # Namespace where the service belongs
+spec:
+  selector:
+    app: hotcold-app               # Selector to match pods for routing traffic
+  ports:
+  - protocol: TCP
+    port: 80                       # Port exposed by the service
+    targetPort: 8080              # Port on the pods to which traffic will be routed

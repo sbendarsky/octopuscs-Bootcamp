@@ -1,0 +1,31 @@
+{{- if .Values.ingress.enabled -}}
+
+# Defines an Ingress resource for routing HTTP traffic
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+
+metadata:
+  # Name of the Ingress derived from the Helm Chart's fullname
+  name: {{ include "hotcold-chart.fullname" . }}
+  # Namespace where the Ingress is deployed
+  namespace: {{ .Release.Namespace }}
+  # Annotations for the Ingress
+  annotations:
+    kubernetes.io/ingress.class: "{{ .Values.ingress.className }}"
+
+spec:
+  # Rules for the Ingress
+  rules:
+  - host: {{ .Values.ingress.host }}
+    http:
+      paths:
+      - path: {{ .Values.ingress.path }}
+        pathType: {{ .Values.ingress.pathType }}
+        backend:
+          # Backend service for routing traffic
+          service:
+            name: {{ include "hotcold-chart.fullname" . }}-service
+            port:
+              number: {{ .Values.service.port }}
+{{- end }}

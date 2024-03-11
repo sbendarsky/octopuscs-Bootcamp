@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+
+metadata:
+  # Name of the service derived from the Helm Chart's fullname
+  name: {{ include "hotcold-chart.fullname" . }}-service
+  # Namespace where the service is deployed
+  namespace: {{ .Release.Namespace }}
+
+spec:
+  # Selector for the service
+  selector:
+    app: hotcold-app
+  # Ports configuration
+  ports:
+  - protocol: TCP
+    port: {{ .Values.service.port }} # Service port defined in Helm values
+    targetPort: {{ .Values.service.targetPort }} # Target port defined in Helm values
+  # Type of service
+  type: ClusterIP

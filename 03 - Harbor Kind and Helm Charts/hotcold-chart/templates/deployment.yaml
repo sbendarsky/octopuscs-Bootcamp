@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  # Name of the Deployment derived from the Helm Chart's fullname
+  name: {{ include "hotcold-chart.fullname" . }}
+  # Namespace where the Deployment is deployed
+  namespace: {{ .Release.Namespace }}
+
+spec:
+  # Number of replicas for the Deployment
+  replicas: {{ .Values.replicaCount }}
+
+  selector:
+    matchLabels:
+      app: hotcold-app
+
+  template:
+    metadata:
+      labels:
+        app: hotcold-app
+
+    spec:
+      # Containers configuration
+      containers:
+      - name: hotcold-container
+        # Image details obtained from Helm values
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        # Image pull policy obtained from Helm values
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        # Ports configuration for the container
+        ports:
+        - containerPort: 8080

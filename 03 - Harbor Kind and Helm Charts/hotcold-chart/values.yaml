@@ -1,0 +1,26 @@
+# Specifies the number of replicas for the deployment
+replicaCount: 3
+
+# Defines the image details for the application
+image:
+  repository: hotcold-stav.octopus.lab/hotcold/hotcold
+  tag: latest
+  pullPolicy: IfNotPresent
+
+# Configuration for the service
+service:
+  name: hotcold-service
+  port: 80
+  targetPort: 8080
+
+# Configuration for the ingress
+ingress:
+  enabled: true
+  className: "nginx"
+  host: hotcold-stav.octopus.lab
+  path: /
+  pathType: Prefix
+
+# Configuration for the namespace
+namespace:
+  name: hotcold-namespace

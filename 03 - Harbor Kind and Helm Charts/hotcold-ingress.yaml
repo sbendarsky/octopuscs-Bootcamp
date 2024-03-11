@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hotcold-ingress            # Name of the Ingress resource
+  namespace: hotcold-namespace     # Namespace where the Ingress belongs
+  annotations:
+    kubernetes.io/ingress.class: "nginx"  # Annotation specifying the Ingress class
+spec:
+  rules:
+  - host: hotcold-stav.octopus.lab  # Host for which the Ingress should route traffic
+    http:
+      paths:
+      - path: /                       # Path for routing traffic
+        pathType: Prefix              # Type of path matching
+        backend:
+          service:
+            name: hotcold-service     # Service to route traffic to
+            port:
+              number: 80               # Port on the service to forward traffic to

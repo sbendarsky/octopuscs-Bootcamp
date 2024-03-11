@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hotcold-app                   # Name of the deployment
+  namespace: hotcold-namespace       # Namespace where the deployment belongs
+spec:
+  replicas: 1                        # Number of desired replicas of the pod
+  selector:
+    matchLabels:
+      app: hotcold-app               # Label selector for identifying pods managed by this deployment
+  template:
+    metadata:
+      labels:
+        app: hotcold-app            # Labels to be applied to pods created by this deployment
+    spec:
+      containers:
+      - name: hotcold-container     # Name of the container
+        image: registry-stav.octopus.lab/hotcold/hotcold:latest   #  Image from our harbor registry
+        ports:
+        - containerPort: 8080       # Port to expose on the container
