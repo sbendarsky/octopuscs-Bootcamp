@@ -53,12 +53,12 @@ After starting the Gogs service, access the GUI installation via localhost:3000.
 
 Afterwards, for our domain, we’ll switch to our own domain. I choose         “gogs-stav” and change our application URL to your desired URL
 
-![GogsGUI](https://rhel.co.il/wp-content/uploads/2024/02/Screenshot-2024-02-19-001651.png)
+![GogsGUI](../resources/Gogs%20Git%20Server%20and%20Nginx/GogsDomain.png)
 
 Finally, create an admin account by clicking on “Admin Account Settings” and then click “Install Gogs”. After that, create a repository called “mkdocs”
 
-![GogsGUI](https://rhel.co.il/wp-content/uploads/2024/02/Screenshot-2024-02-19-001955.png)
-![GogsGUI](https://rhel.co.il/wp-content/uploads/2024/02/Screenshot-2024-02-19-004223.png)
+![GogsGUI](../resources/Gogs%20Git%20Server%20and%20Nginx/GogsInstall.png)
+![GogsGUI](../resources/Gogs%20Git%20Server%20and%20Nginx/GogsRepo.png)
 
 ### Deploying MkDocs
 * Downloading MkDocs is simple. First, download pip, then use it to install MkDocs
@@ -73,10 +73,10 @@ cd my-project
 mkdocs serve
 ```
 
-![cmd](https://rhel.co.il/wp-content/uploads/2024/02/Screenshot-2024-02-19-004929.png)
+![cmd](../resources/Gogs%20Git%20Server%20and%20Nginx/GitPush.png)
 And now we can access MkDocs via localhost:8000
 
-![web](https://rhel.co.il/wp-content/uploads/2024/02/Screenshot-2024-02-19-005230.png)
+![web](../resources/Gogs%20Git%20Server%20and%20Nginx/MkDocs.png)
 
 ### Pushing To MkDocs To Gogs
 
@@ -117,7 +117,7 @@ vi /etc/hosts
 
 To streamline access to your websites, ensure you enter the correct URLs with ports: use :3000 for Gogs and :8000 for MkDocs. To optimize your setup further, integrate these servers with Nginx by modifying the Nginx configuration file. Prioritize safety by backing up the file before any alterations. After editing, execute a syntax check with sudo nginx -t and then restart the Nginx server using sudo systemctl restart nginx. Ensure that your configuration encompasses server blocks for each server listening on port 80. Each block should include server_name and proxy_pass directives to appropriately route incoming requests
 
-![nginx](https://rhel.co.il/wp-content/uploads/2024/02/Screenshot-2024-02-19-012716.png)
+![nginx](../resources/Gogs%20Git%20Server%20and%20Nginx/NginxConf.png)
 
 ### Congratulations
 
