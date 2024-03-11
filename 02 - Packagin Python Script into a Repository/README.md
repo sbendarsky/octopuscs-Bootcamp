@@ -10,7 +10,7 @@ In this guide, we’ll create a simple Python script. Our Python script is a bac
 
 > Quick Tip: Use the “Remote – SSH” extension in Visual Studio Code (VSCode) to connect to remote machines directly from your editor
 
-![code](https://rhel.co.il/wp-content/uploads/2024/02/Screenshot-2024-02-21-101921.png)
+![code](../resources/Packagin%20Python%20Script%20into%20a%20Repository/apppython.png)
 
 access crontab by using: crontab -e
 the following running the script at minute zero
@@ -30,7 +30,7 @@ rpmdev-setuptree
 check if everything worked correctly by running: tree ~/rpmbuild
 You should see a tree structure with empty directories similar to the screenshot below
 
-![tree](https://rhel.co.il/wp-content/uploads/2024/02/Screenshot-2024-02-21-103245.png)
+![tree](../resources/Packagin%20Python%20Script%20into%20a%20Repository/treerpm.png)
 
 This directory structure provides a framework for building RPM packages. We’ll use it to organize our script and any related files before creating our own RPM package. Let’s proceed with building our backup script
 
@@ -46,13 +46,13 @@ mv sb-backup-1.0.tar.gz ~/rpmbuild/SOURCES
 Now, we need to create a spec file (sb-backup.spec) in the SPECS directory of our RPM build tree. We’ll use this spec file to define how our RPM package should be built
 This process allows you to create a custom RPM package containing your Python script and configuration file, making it easy to distribute and install on other systems
 
-![rpm](https://rhel.co.il/wp-content/uploads/2024/02/Screenshot-2024-02-21-104031-300x288.png)
+![rpm](../resources/Packagin%20Python%20Script%20into%20a%20Repository/rpmbuild.png)
 
 and run rpmbuild -bb sb-backup.spec to build the package
 
 Congrats! You’ve successfully built a rpm package
 
-![rpmbuilt](https://rhel.co.il/wp-content/uploads/2024/02/Screenshot-2024-02-21-104156.png)
+![rpmbuilt](../resources/Packagin%20Python%20Script%20into%20a%20Repository/rpm.png)
 
 ### Creating a Repository
 in this section we are going to create a repository for our rpm package and serve it with nginx so everyone in your network can download your package
@@ -67,19 +67,20 @@ createrepo
 ```
 Now, let’s copy our RPM package into the repository directory. Assuming your RPM package file is named sb-backup-1.0.rpm, you can use the cp command to copy it
 
-![repo](https://rhel.co.il/wp-content/uploads/2024/02/Screenshot-2024-02-21-104614.png)
+![repo](../resources/Packagin%20Python%20Script%20into%20a%20Repository/copying.png)
 
 Setting up permissions to expose the repo to the network
 
-![repo](https://rhel.co.il/wp-content/uploads/2024/02/Screenshot-2024-02-21-104651.png)
+![repo](../resources/Packagin%20Python%20Script%20into%20a%20Repository/firewall.png)
 
 Creating a new configuration file in Nginx and adding a server block configuration, then restarting the Nginx service
 
-![repo](https://rhel.co.il/wp-content/uploads/2024/02/Screenshot-2024-02-21-104734.png)
-![repo](https://rhel.co.il/wp-content/uploads/2024/02/Screenshot-2024-02-21-104755.png)
+![repo](../resources/Packagin%20Python%20Script%20into%20a%20Repository/startingnginx.png)
+![repo](../resources/Packagin%20Python%20Script%20into%20a%20Repository/nginx.png)
+
 Now, we need to add a new repository in the /etc/yum.repos.d directory
 
-![repo](https://rhel.co.il/wp-content/uploads/2024/02/Screenshot-2024-02-21-105011.png)
+![repo](../resources/Packagin%20Python%20Script%20into%20a%20Repository/yumrepo.png)
 
 ### We've Done It
 Once our package is ready, we can share it with other clients in the same network by configuring their repository settings. This involves adding a new .repo file with the baseurl parameter pointing to the location where our package is hosted, such as an Nginx file share
@@ -88,4 +89,4 @@ After configuring the repository settings, users can install our package by runn
 ```
 sudo dnf install sb-backup
 ```
-![installing](https://rhel.co.il/wp-content/uploads/2024/02/Screenshot-2024-02-21-110019.png)
+![installing](../resources/Packagin%20Python%20Script%20into%20a%20Repository/installapp.png)
