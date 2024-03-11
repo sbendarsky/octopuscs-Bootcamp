@@ -1,0 +1,45 @@
+
+- name: Create Flask application directory
+  ansible.builtin.file:
+    path: /home/ansible/flask
+    state: directory
+    mode: '0755'
+
+- name: Create a basic Flask application with one API endpoint (/api/message) thats return simple JSON response 
+  ansible.builtin.copy:
+    content: |
+      from flask import Flask, jsonify
+      app = Flask(__name__)
+
+      @app.route('/api/message', methods=['GET'])
+      def message():
+          return jsonify({'message': 'Hello, World!'})
+
+      if __name__ == '__main__':
+          app.run(host='0.0.0.0', port=5000)
+    dest: /home/ansible/flask/app.py
+
+- name: Create a Dockerfile for the Flask application
+  ansible.builtin.copy:
+    content: |
+      FROM python:3.8-slim
+      WORKDIR /app
+      COPY . /app
+      RUN pip install --no-cache-dir flask
+      EXPOSE 5000
+      CMD ["python", "app.py"]
+    dest: /home/ansible/flask/Dockerfile
+
+- name: Create a Docker image for the Flask application
+  ansible.builtin.docker_image:
+    name: flask-app
+    tag: latest
+    source: build
+    build:
+      path: /home/ansible/flask
+
+- name: login and push image
+  ansible.builtin.shell: |
+    docker login docker-stav.octopus.lab -u admin -p Password1
+    docker tag flask-app docker-stav.octopus.lab/docker-local/flask-app:latest
+    docker push docker-stav.octopus.lab/docker-local/flask-app:latest

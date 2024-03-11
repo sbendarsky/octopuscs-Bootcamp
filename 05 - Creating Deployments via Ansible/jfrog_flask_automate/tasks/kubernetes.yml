@@ -1,0 +1,113 @@
+
+- name: Create a namespace for application
+  ansible.builtin.k8s:
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: flask-app
+
+- name: create a secret for the docker registry
+  ansible.builtin.shell:
+    cmd: |
+      kubectl create secret docker-registry regcred \
+      --docker-server=docker-stav.octopus.lab \
+      --docker-username=admin \
+      --docker-password=Password1 \
+      --docker-email=your-email@example.com \
+      -n flask-app
+
+- name: Create deployment and pull from docker-stav.octopus.lab/docker-local/flask-app:latest (use imagepullsecret)
+  ansible.builtin.k8s:
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: flask-app
+        namespace: flask-app
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            app: flask-app
+        template:
+          metadata:
+            labels:
+              app: flask-app
+          spec:
+            containers:
+              - name: flask-app
+                image: docker-stav.octopus.lab/docker-local/flask-app:latest
+                ports:
+                  - containerPort: 5000
+            imagePullSecrets:
+              - name: regcred
+
+- name: Create a service for the Flask application
+  ansible.builtin.k8s:
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: flask-app
+        namespace: flask-app
+      spec:
+        selector:
+          app: flask-app
+        ports:
+          - protocol: TCP
+            port: 80
+            targetPort: 5000
+        type: ClusterIP
+
+- name: Create ingress for the Flask application
+  ansible.builtin.k8s:
+    definition:
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      metadata:
+        name: flask-app
+        namespace: flask-app
+        annotations:
+          kubernetes.io/ingress.class: "nginx"
+      spec:
+        rules:
+          - host: flask-app.octopus.lab
+            http:
+              paths:
+                - path: /
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: flask-app
+                      port:
+                        number: 80
+
+- name: Extract IP of the flask ingress
+  ansible.builtin.command: "kubectl get ingress -n flask-app flask-app -o jsonpath='{.status.loadBalancer.ingress[0].ip}'"
+  register: ingress
+
+- name: add to /etc/hosts
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    line: "{{ ingress.stdout }} flask-app.octopus.lab"
+    state: present
+
+- name: Allow it through SE Linux with became
+  ansible.builtin.seboolean:
+    name: httpd_can_network_connect
+    state: yes
+    persistent: yes
+  become: yes
+
+- name: Allow ports through firewall
+  ansible.builtin.firewalld:
+    port: "{{ item }}"
+    permanent: yes
+    state: enabled
+    immediate: yes
+  loop:
+    - 80/tcp
+    - 5000/tcp
+
+    

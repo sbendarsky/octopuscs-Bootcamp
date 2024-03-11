@@ -1,0 +1,3 @@
+- hosts: devops
+  roles:
+    - jfrog_flask_automate

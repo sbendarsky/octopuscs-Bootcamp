@@ -1,0 +1,280 @@
+# - name: Install openssl
+#   ansible.builtin.package:
+#     name: openssl
+#     state: present
+#   become: yes
+
+# - name: Ensure /etc/ssl/private directory exists
+#   ansible.builtin.file:
+#     path: /etc/ssl/private
+#     state: directory
+#     mode: '0700'
+
+# - name: Ensure /etc/ssl/csr directory exists
+#   ansible.builtin.file:
+#     path: /etc/ssl/csr
+#     state: directory
+#     mode: '0700'
+
+# - name: Ensure /etc/ssl/crt directory exists
+#   ansible.builtin.file:
+#     path: /etc/ssl/crt
+#     state: directory
+#     mode: '0700'
+
+# - name: Generate a private key for docker-stav.octopus.lab
+#   ansible.builtin.openssl_privatekey:
+#     path: /etc/ssl/private/docker-stav.octopus.lab.pem
+
+# - name: Generate a Certificate Signing Request
+#   ansible.builtin.openssl_csr:
+#     path: /etc/ssl/csr/docker-stav.octopus.lab.csr
+#     privatekey_path: /etc/ssl/private/docker-stav.octopus.lab.pem
+#     common_name: docker-stav.octopus.lab
+
+# - name: Generate a Self Signed OpenSSL certificate
+#   ansible.builtin.openssl_certificate:
+#     path: /etc/ssl/crt/docker-stav.octopus.lab.crt
+#     privatekey_path: /etc/ssl/private/docker-stav.octopus.lab.pem
+#     csr_path: /etc/ssl/csr/docker-stav.octopus.lab.csr
+#     provider: selfsigned
+
+# - name: Generate a new private key
+#   ansible.builtin.openssl_privatekey:
+#     path: /etc/ssl/private/artifactory-stav.octopus.lab.pem
+
+# - name: Generate a Certificate Signing Request
+#   ansible.builtin.openssl_csr:
+#     path: /etc/ssl/csr/artifactory-stav.octopus.lab.csr
+#     privatekey_path: /etc/ssl/private/artifactory-stav.octopus.lab.pem
+#     common_name: artifactory-stav.octopus.lab
+
+# - name: Generate a Self Signed OpenSSL certificate
+#   ansible.builtin.openssl_certificate:
+#     path: /etc/ssl/crt/artifactory-stav.octopus.lab.crt
+#     privatekey_path: /etc/ssl/private/artifactory-stav.octopus.lab.pem
+#     csr_path: /etc/ssl/csr/artifactory-stav.octopus.lab.csr
+#     provider: selfsigned
+
+# - name: Create a namespace for JFrog Artifactory
+#   ansible.builtin.k8s:
+#     kubeconfig: /home/ansible/.kube/config
+#     state: present
+#     definition:
+#       apiVersion: v1
+#       kind: Namespace
+#       metadata:
+#         name: jfrog
+
+# - name: Create a namespace for JFrog Artifactory
+#   ansible.builtin.k8s:
+#     kubeconfig: /home/ansible/.kube/config
+#     state: present
+#     definition:
+#       apiVersion: v1
+#       kind: Namespace
+#       metadata:
+#         name: jfrog
+
+# - name: Create a deployment for JFrog Artifactory
+#   ansible.builtin.k8s:
+#     kubeconfig: /home/ansible/.kube/config
+#     state: present
+#     definition:
+#       apiVersion: apps/v1
+#       kind: Deployment
+#       metadata:
+#         name: artifactory
+#         namespace: jfrog
+#       spec:
+#         replicas: 1
+#         selector:
+#           matchLabels:
+#             app: artifactory
+#         template:
+#           metadata:
+#             labels:
+#               app: artifactory
+#           spec:
+#             containers:
+#             - name: artifactory
+#               image: releases-docker.jfrog.io/jfrog/artifactory-pro:7.77.6
+#               ports:
+#               - containerPort: 8081
+#                 name: comms
+#               - containerPort: 8082
+#                 name: ui
+
+# - name: Create a service for JFrog Artifactory
+#   ansible.builtin.k8s:
+#     kubeconfig: /home/ansible/.kube/config
+#     state: present
+#     definition:
+#       apiVersion: v1
+#       kind: Service
+#       metadata:
+#         name: artifactory-service
+#         namespace: jfrog
+#       spec:
+#         selector:
+#           app: artifactory
+#         ports:
+#         - name: http
+#           protocol: TCP
+#           port: 80
+#           targetPort: 8082
+#         - name: docker
+#           protocol: TCP
+#           port: 8081
+#           targetPort: 8081
+
+# - name: Fetch the certificate from the remote host
+#   ansible.builtin.fetch:
+#     src: /etc/ssl/crt/docker-stav.octopus.lab.crt
+#     dest: /tmp/docker-stav.octopus.lab.crt
+#     flat: yes
+
+# - name: Fetch the private key from the remote host
+#   ansible.builtin.fetch:
+#     src: /etc/ssl/private/docker-stav.octopus.lab.pem
+#     dest: /tmp/docker-stav.octopus.lab.pem
+#     flat: yes
+
+# - name: Create a secret for TLS
+#   ansible.builtin.k8s:
+#     kubeconfig: /home/ansible/.kube/config
+#     state: present
+#     definition:
+#       apiVersion: v1
+#       kind: Secret
+#       metadata:
+#         name: artifactory-tls
+#         namespace: jfrog
+#       type: kubernetes.io/tls
+#       data:
+#         tls.crt: "{{ lookup('file', '/tmp/docker-stav.octopus.lab.crt') | b64encode }}"
+#         tls.key: "{{ lookup('file', '/tmp/docker-stav.octopus.lab.pem') | b64encode }}"
+
+# - name: Create an ingress for JFrog Artifactory
+#   ansible.builtin.k8s:
+#     kubeconfig: /home/ansible/.kube/config
+#     state: present
+#     definition:
+#       apiVersion: networking.k8s.io/v1
+#       kind: Ingress
+#       metadata:
+#         name: artifactory-ingress
+#         namespace: jfrog
+#         annotations:
+#           kubernetes.io/ingress.class: "nginx"
+#       spec:
+#         tls:
+#         - hosts:
+#           - artifactory-stav.octopus.lab
+#           - docker-stav.octopus.lab
+#           secretName: artifactory-tls
+#         rules:
+#         - host: artifactory-stav.octopus.lab
+#           http:
+#             paths:
+#             - pathType: Prefix
+#               path: "/"
+#               backend:
+#                 service:
+#                   name: artifactory-service
+#                   port:
+#                     number: 80
+
+# - name: Create a ingress for Jfrog comms
+#   ansible.builtin.k8s:
+#     kubeconfig: /home/ansible/.kube/config
+#     state: present
+#     definition:
+#       apiVersion: networking.k8s.io/v1
+#       kind: Ingress
+#       metadata:
+#         name: artifactory-ingress-comms
+#         namespace: jfrog
+#         annotations:
+#           kubernetes.io/ingress.class: "nginx"
+#           ingress.kubernetes.io/force-ssl-redirect: "true"
+#           ingress.kubernetes.io/proxy-body-size: "0"
+#           ingress.kubernetes.io/proxy-read-timeout: "600"
+#           ingress.kubernetes.io/proxy-send-timeout: "600"
+#           nginx.org/client-max-body-size: "0"
+#           nginx.ingress.kubernetes.io/configuration-snippet: |
+#             proxy_set_header    X-JFrog-Override-Base-Url http://docker-stav.octopus.lab;
+#           nginx.ingress.kubernetes.io/proxy-body-size: "0"
+#       spec:
+#         tls:
+#         - hosts:
+#           - artifactory-stav.octopus.lab
+#           - docker-stav.octopus.lab
+#           secretName: artifactory-tls
+#         rules:
+#         - host: docker-stav.octopus.lab
+#           http:
+#             paths:
+#             - pathType: Prefix
+#               path: "/"
+#               backend:
+#                 service:
+#                   name: artifactory-service
+#                   port:
+#                     number: 8081
+
+# - name: Extract ingress IP 
+#   ansible.builtin.command: "kubectl get ingress -n jfrog artifactory-ingress -o jsonpath='{.status.loadBalancer.ingress[0].ip}'"
+#   register: ingress_ip
+
+# - name: Apply to hosts file
+#   ansible.builtin.lineinfile:
+#     path: /etc/hosts
+#     line: "{{ ingress_ip.stdout }} artifactory-stav.octopus.lab"
+#     state: present
+
+# - name: Apply coms to hosts file
+#   ansible.builtin.lineinfile:
+#     path: /etc/hosts
+#     line: "{{ ingress_ip.stdout }} docker-stav.octopus.lab"
+#     state: present
+
+# - name: Copy to crt to Docker control plane
+#   ansible.builtin.shell: |
+#     docker cp /etc/ssl/crt/docker-stav.octopus.lab.crt kind-cluster-control-plane:/etc/ssl/certs
+#     docker exec kind-cluster-control-plane update-ca-certificates
+#     docker exec kind-cluster-control-plane systemctl restart containerd
+#   become: yes
+
+# - name: Copy to crt to Docker worker
+#   ansible.builtin.shell: |
+#     docker cp /etc/ssl/crt/docker-stav.octopus.lab.crt kind-cluster-worker:/etc/ssl/certs
+#     docker exec kind-cluster-worker update-ca-certificates
+#     docker exec kind-cluster-worker systemctl restart containerd
+#   become: yes
+
+# - name: Copy to crt to Docker worker2
+#   ansible.builtin.shell: |
+#     docker cp /etc/ssl/crt/docker-stav.octopus.lab.crt kind-cluster-worker2:/etc/ssl/certs
+#     docker exec kind-cluster-worker2 update-ca-certificates
+#     docker exec kind-cluster-worker2 systemctl restart containerd
+#   become: yes
+
+# - name: Allow it through SE Linux with became
+#   ansible.builtin.seboolean:
+#     name: httpd_can_network_connect
+#     state: yes
+#     persistent: yes
+#   become: yes
+
+- name: Allow ports through firewall
+  ansible.builtin.firewalld:
+    port: "{{ item }}"
+    permanent: yes
+    state: enabled
+    immediate: yes
+  loop:
+    - 80/tcp
+    - 8081/tcp
+    - 8082/tcp
+  become: yes

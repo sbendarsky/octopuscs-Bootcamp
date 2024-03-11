@@ -1,0 +1,23 @@
+---
+- name: Setup
+  include_tasks: setup.yml
+
+- name: Jfrog
+  include_tasks: jfrog.yml
+  register: jfrog_output
+
+- name: Prompt user for input
+  pause:
+    prompt: "Please go to stav-artifactory.octopus.lab and create a docker-repository with your jfrog license. Afterwards, press 1 to continue."
+  register: user_input
+
+- name: Continue if user pressed 1
+  debug:
+    msg: "Continuing with the playbook..."
+  when: user_input.user_input | int == 1
+
+- name: Flask
+  include_tasks: flask.yml
+
+- name: Kubernetes
+  include_tasks: kubernetes.yml

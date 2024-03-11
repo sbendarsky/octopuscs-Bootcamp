@@ -1,0 +1,228 @@
+# - name: Install dnf dependencies
+#   ansible.builtin.dnf:
+#     name: "{{ item }}"
+#     state: present
+#   loop:
+#     - curl
+#     - gnupg2
+#     - dnf-plugins-core
+
+# - name: Add Docker's official GPG key
+#   ansible.builtin.shell: curl -fsSL https://download.docker.com/linux/fedora/gpg | sudo gpg --import -
+
+# - name: Add Docker repository
+#   ansible.builtin.shell: sudo dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
+
+# - name: Install Docker
+#   ansible.builtin.dnf:
+#     name: "{{ item }}"
+#     state: present
+#   loop:
+#     - docker-ce
+#     - docker-ce-cli
+#     - containerd.io
+#     - docker-buildx-plugin
+#     - docker-compose-plugin
+
+# - name: Create a docker group
+#   ansible.builtin.group:
+#     name: docker
+#     state: present
+
+# - name: adding existing user 'ansible' to group docker
+#   user:
+#     name: ansible
+#     groups: docker
+#     append: yes
+
+# - name: make sure /etc/docker/daemon.json exists
+#   ansible.builtin.file:
+#     path: /etc/docker/daemon.json
+#     state: touch
+
+# - name: Adding a docker registry to /etc/docker/daemon.json
+#   ansible.builtin.lineinfile:
+#     path: /etc/docker/daemon.json
+#     line: '{ "insecure-registries": ["docker-stav.octopus.lab"] }'
+#     state: present
+
+# - name: Reload Docker
+#   ansible.builtin.service:
+#     name: docker
+#     state: reloaded
+
+# - name: Enable containerd service
+#   ansible.builtin.systemd:
+#     name: containerd
+#     state: started
+#     enabled: yes
+
+# - name: Start and enable Docker service
+#   ansible.builtin.systemd:
+#     name: docker
+#     state: started
+#     enabled: yes
+
+# - name: Check Docker version
+#   ansible.builtin.command: docker --version
+#   register: docker_version
+#   changed_when: false
+
+# - name: Display Docker version
+#   ansible.builtin.debug:
+#     var: docker_version.stdout_lines
+
+# - name: Install Kind for AMD64 / x86_64
+#   ansible.builtin.shell: |
+#     [ $(uname -m) = x86_64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.22.0/kind-linux-amd64
+#     chmod +x ./kind
+#     sudo mv ./kind /usr/local/bin/kind
+#   args:
+#     executable: /bin/bash
+#   when: ansible_architecture == "x86_64"
+
+# - name: Install Kind for ARM64
+#   ansible.builtin.shell: |
+#     [ $(uname -m) = aarch64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.22.0/kind-linux-arm64
+#     chmod +x ./kind
+#     sudo mv ./kind /usr/local/bin/kind
+#   args:
+#     executable: /bin/bash
+#   when: ansible_architecture == "aarch64"
+
+# - name: Get latest kubectl version
+#   ansible.builtin.uri:
+#     url: https://dl.k8s.io/release/stable.txt
+#     return_content: yes
+#   register: version
+
+# - name: Download the latest kubectl release
+#   ansible.builtin.get_url:
+#     url: https://dl.k8s.io/release/v1.29.2/bin/linux/amd64/kubectl
+#     dest: /usr/local/bin/kubectl
+#     mode: '0755'
+
+# - name: Verify kubectl is installed
+#   ansible.builtin.command: kubectl version --client
+#   register: kubectl_version
+#   changed_when: false
+
+# - name: Display kubectl version
+#   ansible.builtin.debug:
+#     var: kubectl_version.stdout_lines
+
+# - name: Install helm if not exists
+#   unarchive:
+#     src: https://get.helm.sh/helm-v3.11.0-linux-amd64.tar.gz
+#     dest: /usr/local/bin
+#     extra_opts: "--strip-components=1"
+#     owner: root
+#     group: root
+#     mode: 0755
+#     remote_src: true
+#   args:
+#     creates: /usr/local/bin/helm
+
+# - name: Create kind cluster configurations
+#   ansible.builtin.copy:
+#     content: |
+#       kind: Cluster
+#       apiVersion: kind.x-k8s.io/v1alpha4
+#       name: kind-cluster
+#       nodes:
+#       - role: control-plane
+#         image: kindest/node:v1.25.3@sha256:f52781bc0d7a19fb6c405c2af83abfeb311f130707a0e219175677e366cc45d1
+#       - role: worker
+#         image: kindest/node:v1.25.3@sha256:f52781bc0d7a19fb6c405c2af83abfeb311f130707a0e219175677e366cc45d1
+#       - role: worker
+#         image: kindest/node:v1.25.3@sha256:f52781bc0d7a19fb6c405c2af83abfeb311f130707a0e219175677e366cc45d1
+#     dest: /home/ansible/kind-config.yaml
+
+# - name: Create a local Kubernetes cluster 
+#   ansible.builtin.command: kind create cluster --config /home/ansible/kind-config.yaml
+  
+# - name: Add ansible user to docker group
+#   ansible.builtin.user:
+#     name: ansible
+#     groups: docker
+#     append: yes
+#   become: yes
+
+# - name: Export kubeconfig run as user ansible
+#   ansible.builtin.command: kind export kubeconfig --name kind-cluster
+#   args:
+#     chdir: /home/ansible
+#   become: no
+#   become_user: ansible
+
+# - name: Install MetalLB
+#   ansible.builtin.command: kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.13.7/config/manifests/metallb-native.yaml
+
+# - name: Wait for MetalLB pods to be ready 
+#   ansible.builtin.command: kubectl wait --for=condition=ready pod --all -n metallb-system --timeout=300s
+
+# - name: Inspect Docker network
+#   ansible.builtin.command: docker network inspect -f '{{ '{{.IPAM.Config}}' | to_json }}' kind
+#   register: docker_network
+#   changed_when: false
+#   check_mode: no
+
+# - name: Parse Docker network inspect output
+#   ansible.builtin.set_fact:
+#     x_value: "{{ docker_network.stdout | regex_search('172\\.(\\d+)\\.\\d+\\.\\d+/16', '\\1') | first }}"
+#   changed_when: false
+
+# - name: Create IP range
+#   ansible.builtin.set_fact:
+#     ip_range: "172.{{ x_value }}.255.200 - 172.{{ x_value }}.255.250"
+#   changed_when: false
+
+# - name: Install pip3
+#   ansible.builtin.dnf:
+#     name: python3-pip
+#     state: present
+
+# - name: Install required Python libraries
+#   ansible.builtin.pip:
+#     name: kubernetes
+#     state: present
+
+# - name: Apply MetalLB IP configuration
+#   ansible.builtin.k8s:
+#     kubeconfig: /home/ansible/.kube/config
+#     state: present
+#     definition:
+#       apiVersion: metallb.io/v1beta1
+#       kind: IPAddressPool
+#       metadata:
+#         name: example
+#         namespace: metallb-system
+#       spec:
+#         addresses:
+#           - "{{ ip_range }}"
+      
+# - name: Apply L2Advertisement configuration
+#   ansible.builtin.k8s:
+#     kubeconfig: /home/ansible/.kube/config
+#     state: present
+#     definition:
+#       apiVersion: metallb.io/v1beta1
+#       kind: L2Advertisement
+#       metadata:
+#         name: empty
+#         namespace: metallb-system
+
+# - name: Pull the helm
+#   ansible.builtin.command: helm pull oci://ghcr.io/nginxinc/charts/nginx-ingress --untar --version 1.1.3
+#   args:
+#     chdir: /home/ansible
+
+# - name: Apply CRDs
+#   ansible.builtin.command: kubectl apply -f crds/
+#   args:
+#     chdir: /home/ansible/nginx-ingress
+
+- name: Install nginx-ingress
+  ansible.builtin.command: helm install nginx-ingress oci://ghcr.io/nginxinc/charts/nginx-ingress --version 1.1.3
+  args:
+    chdir: /home/ansible/nginx-ingress
